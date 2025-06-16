@@ -62,6 +62,7 @@ if (strlen($_SESSION['sturecmsaid']) == 0) {
 
     // Student table update
     if ($role === 'student') {
+        $name = $_POST['fullname'];
         $dob = $_POST['dob'] ?? '';
         $level = $_POST['level'] ?? '';
         $matric_number = $_POST['matric_number'] ?? '';
@@ -69,8 +70,8 @@ if (strlen($_SESSION['sturecmsaid']) == 0) {
         $guardian_name = $_POST['guardian_name'] ?? '';
         $guardian_phone = $_POST['guardian_phone'] ?? '';
 
-        $query2 = "UPDATE students SET dob=?, level=?, matric_number=?, department=?, guardian_name=?, guardian_phone=? WHERE user_id=?";
-        $params2 = [$dob, $level, $matric_number, $department, $guardian_name, $guardian_phone, $userId];
+        $query2 = "UPDATE students SET name=?, dob=?, level=?, matric_number=?, department=?, guardian_name=?, guardian_phone=? WHERE user_id=?";
+        $params2 = [$name, $dob, $level, $matric_number, $department, $guardian_name, $guardian_phone, $userId];
 
         $stmt2 = $dbh->prepare($query2);
         $stmt2->execute($params2);

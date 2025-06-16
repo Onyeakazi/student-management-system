@@ -22,19 +22,9 @@
         }
         </script>
     <link rel="stylesheet" href="assets/css/style.css" />
-    <script src="http://js.nicedit.com/nicEdit-latest.js" type="text/javascript"></script>
+    <!-- <script src="http://js.nicedit.com/nicEdit-latest.js" type="text/javascript"></script> -->
     <script type="text/javascript">bkLib.onDomLoaded(nicEditors.allTextAreas);</script>
-    <script type="text/javascript">
-      function checkpass(){
-        if(document.changepassword.newpassword.value!=document.changepassword.confirmpassword.value){
-          alert('New Password and Confirm Password field does not match');
-          document.changepassword.confirmpassword.focus();
-          return false;
-        }
-        return true;
-      }   
-
-    </script>
+  
   </head>
   <body>
     <div id="page"></div>

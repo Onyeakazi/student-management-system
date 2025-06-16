@@ -71,6 +71,8 @@
       };    
     ?>
 
+
+    <!-- Lecturer Sidebar -->
     <?php 
       if (isset($_SESSION['role']) && $_SESSION['role'] === 'instructor') {
         echo '
@@ -89,93 +91,89 @@
           
           <li class="nav-item">
             <a class="nav-link" href="add-video">
-            <i class="icon-camrecorder menu-icon"></i>
-            <span class="menu-title">Add Video Course</span>
+              <i class="icon-camrecorder menu-icon"></i>
+              <span class="menu-title">Add Video Course</span>
             </a>
           </li>
+
           <li class="nav-item">
             <a class="nav-link" href="add-materials">
               <i class="icon-doc menu-icon"></i>
               <span class="menu-title">Add Course Material</span>
             </a>
           </li>
+
+          <li class="nav-item">
+            <a class="nav-link" href="add-assignment">
+              <i class="icon-doc menu-icon"></i>
+              <span class="menu-title">Add Assignment</span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" href="meet_link">
+              <i class="icon-link menu-icon"></i>
+              <span class="menu-title">Manage Meet Link</span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" href="https://meet.google.com/new" target="_blank">
+              <i class="icon-video menu-icon"></i>
+              <span class="menu-title text-success">Create Class Meeting</span>
+            </a>
+          </li>
         ';
-      };    
+      }
     ?>
 
-    <?php 
-      if (isset($_SESSION['role']) && $_SESSION['role'] === 'student') {
+    <!-- Student Sidebar  -->
+   <?php 
+    if (isset($_SESSION['role']) && $_SESSION['role'] === 'student') {
+      echo '
+        <li class="nav-item">
+          <a class="nav-link" data-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
+            <i class="icon-layers menu-icon"></i>
+            <span class="menu-title">Courses</span>
+          </a>
+          <div class="collapse" id="ui-basic">
+            <ul class="nav flex-column sub-menu">
+              <li class="nav-item"> <a class="nav-link" href="student-courses">My Courses</a></li>
+              <li class="nav-item"> <a class="nav-link" href="enroll_course">Enroll Course</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="view-assignments">
+            <i class="icon-doc menu-icon"></i>
+            <span class="menu-title">Assignments</span>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="manage-notice">
+            <i class="icon-doc menu-icon"></i>
+            <span class="menu-title">Notice</span>
+          </a>
+        </li>
+      ';
+
+      // Add Join Meeting button if Meet link exists
+      $stmt = $dbh->query("SELECT link FROM meet_link WHERE id = 1");
+      $link = $stmt->fetchColumn();
+      if (!empty($link)) {
         echo '
-          // <li class="nav-item">
-          //   <a class="nav-link" data-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
-          //     <i class="icon-layers menu-icon"></i>
-          //     <span class="menu-title">Courses</span>
-          //   </a>
-          //   <div class="collapse" id="ui-basic">
-          //     <ul class="nav flex-column sub-menu">
-          //       <li class="nav-item"> <a class="nav-link" href="add-class">Add Course</a></li>
-          //       <li class="nav-item"> <a class="nav-link" href="manage-class">Manage Courses</a></li>
-          //       <li class="nav-item"> <a class="nav-link" href="manage-class">Assign Course</a></li>
-          //     </ul>
-          //   </div>
-          // </li>
-          // <li class="nav-item">
-          //   <a class="nav-link" href="manage-lecturers">
-          //   <i class="icon-user menu-icon"></i>
-          //     <span class="menu-title">Lecturers</span>
-      
-          //   </a>
-          // </li>
-          // <li class="nav-item">
-          //   <a class="nav-link" data-toggle="collapse" href="#ui-basic1" aria-expanded="false" aria-controls="ui-basic1">
-          //     <i class="icon-people menu-icon"></i>
-          //     <span class="menu-title">Students</span>
-          //   </a>
-          //   <div class="collapse" id="ui-basic1">
-          //     <ul class="nav flex-column sub-menu">
-          //       <li class="nav-item"> <a class="nav-link" href="add-students">Add Students</a></li>
-          //       <li class="nav-item"> <a class="nav-link" href="manage-students">Manage Students</a></li>
-          //     </ul>
-          //   </div>
-          // </li>
-          // <li class="nav-item">
-          //   <a class="nav-link" data-toggle="collapse" href="#auth" aria-expanded="false" aria-controls="auth">
-          //     <i class="icon-doc menu-icon"></i>
-          //     <span class="menu-title">Notice</span>
-          //   </a>
-          //   <div class="collapse" id="auth">
-          //     <ul class="nav flex-column sub-menu">
-          //       <li class="nav-item"> <a class="nav-link" href="add-notice"> Add Notice </a></li>
-          //       <li class="nav-item"> <a class="nav-link" href="manage-notice"> Manage Notice </a></li>
-          //     </ul>
-          //   </div>
-          // </li>
-          // <li class="nav-item">
-          //   <a class="nav-link" data-toggle="collapse" href="#auth1" aria-expanded="false" aria-controls="auth">
-          //     <i class="icon-doc menu-icon"></i>
-          //     <span class="menu-title">Public Notice</span>
-          //   </a>
-          //   <div class="collapse" id="auth1">
-          //     <ul class="nav flex-column sub-menu">
-          //       <li class="nav-item"> <a class="nav-link" href="add-public-notice"> Add Public Notice </a></li>
-          //       <li class="nav-item"> <a class="nav-link" href="manage-public-notice"> Manage Public Notice </a></li>
-          //     </ul>
-          //   </div>
-          //   <li class="nav-item">
-          //   <a class="nav-link" href="between-dates-reports">
-          //   <i class="icon-flag menu-icon"></i>
-          //   <span class="menu-title">Reports</span>
-          //   </a>
-          // </li>
-          // <li class="nav-item">
-          //   <a class="nav-link" href="search">
-          //     <i class="icon-magnifier menu-icon"></i>
-          //     <span class="menu-title">Search</span>
-          //   </a>
-          // </li>
+          <li class="nav-item">
+            <a class="nav-link" href="'.htmlentities($link).'" target="_blank">
+              <i class="icon-video menu-icon"></i>
+              <span class="menu-title text-success">Join Class Meeting</span>
+            </a>
+          </li>
         ';
-      };    
-    ?>
+      }
+    }
+  ?>
+
 
   </ul>
 </nav>

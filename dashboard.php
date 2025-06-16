@@ -263,6 +263,174 @@ $totnotice = $dbh->query("SELECT COUNT(*) FROM notice")->fetchColumn();
                                     </div>
                                 </div>
 
+                                <?php
+                                  // Total Materials
+                                  $lecturer_id = $_SESSION['sturecmsaid']; 
+
+                                  $stmt = $dbh->prepare("SELECT id FROM lecturers WHERE user_id = ?");
+                                  $stmt->execute([$lecturer_id]);
+                                  $lecturer = $stmt->fetch();
+                                  $actual_lecturer_id = $lecturer['id'];
+
+                                  $stmt = $dbh->prepare("SELECT COUNT(*) as total FROM assignments WHERE lecturer_id = :lecturer_id");
+                                  $stmt->bindParam(':lecturer_id', $actual_lecturer_id, PDO::PARAM_INT);
+                                  $stmt->execute();
+                                  $assignments = $stmt->fetch(PDO::FETCH_OBJ);
+                                ?>
+
+                                <div class="col-md-6 report-inner-cards-wrapper">
+                                    <div class="report-inner-card" style="background-color: #90db72;">
+                                        <div class="inner-card-text text-white">
+                                            <span class="report-title">Total Assignments</span>
+                                            <h4><?php echo $assignments->total; ?></h4>
+                                            <a href="lect-assignments"><span class="report-count"> View Assignments</span></a>
+                                        </div>
+                                        <div class="inner-card-icon"><i class="icon-doc"></i></div>
+                                    </div>
+                                </div>
+
+                                <?php
+                                  // Get lecturer actual ID
+                                  $lecturer_id = $_SESSION['sturecmsaid']; 
+
+                                  $stmt = $dbh->prepare("SELECT id FROM lecturers WHERE user_id = ?");
+                                  $stmt->execute([$lecturer_id]);
+                                  $lecturer = $stmt->fetch();
+                                  $actual_lecturer_id = $lecturer['id'];
+
+                                  // Count submissions that are not graded yet (grade IS NULL)
+                                  $stmt = $dbh->prepare("
+                                    SELECT COUNT(*) as ungraded 
+                                    FROM assignment_submissions s
+                                    JOIN assignments a ON s.assignment_id = a.id
+                                    WHERE a.lecturer_id = :lecturer_id AND s.score IS NULL
+                                  ");
+                                  $stmt->bindParam(':lecturer_id', $actual_lecturer_id, PDO::PARAM_INT);
+                                  $stmt->execute();
+                                  $ungraded = $stmt->fetch(PDO::FETCH_OBJ);
+                                ?>
+
+                                <div class="col-md-6 report-inner-cards-wrapper">
+                                  <div class="report-inner-card" style="background-color: #f2240d;">
+                                    <div class="inner-card-text text-white">
+                                      <span class="report-title">Ungraded Submissions</span>
+                                      <h4><?php echo $ungraded->ungraded; ?></h4>
+                                      <a href="view-submissions"><span class="report-count"> View Now</span></a>
+                                    </div>
+                                    <div class="inner-card-icon"><i class="icon-pencil"></i></div>
+                                  </div>
+                                </div>
+
+
+                            <?php endif; ?>
+
+                            <!-- Student -->
+                            <?php if (isset($_SESSION['role']) && $_SESSION['role'] === "student") : ?>
+
+                                <?php
+                                  $student_id = $_SESSION['sturecmsaid']; 
+
+                                  $stmt = $dbh->prepare("SELECT id FROM students WHERE user_id = ?");
+                                  $stmt->execute([$student_id]);
+                                  $student = $stmt->fetch();
+                                  $actual_student_id = $student['id'];
+                                  // Total Courses
+                                  $stmt = $dbh->prepare("SELECT * FROM student_courses WHERE student_id = :student_id");
+                                  $stmt->bindParam(':student_id', $actual_student_id, PDO::PARAM_INT);
+                                  $stmt->execute();
+                                  $courses = $stmt->fetchAll(PDO::FETCH_OBJ);
+                                ?>
+
+                                <div class="col-md-6 report-inner-cards-wrapper">
+                                    <div class="report-inner-card color-1">
+                                        <div class="inner-card-text text-white">
+                                            <span class="report-title">Enrolled Courses</span>
+                                            <h4><?php echo count($courses); ?></h4>
+                                            <a href="student-courses"><span class="report-count"> View Courses</span></a>
+                                        </div>
+                                        <div class="inner-card-icon"><i class="icon-rocket"></i></div>
+                                    </div>
+                                </div>
+
+                                <?php
+                                  $enrolled_course_ids = array_column($courses, 'course_id'); // extract course IDs
+                                  $placeholders = implode(',', array_fill(0, count($enrolled_course_ids), '?')); // ?,?,?
+                                  if ($placeholders) {
+                                      $stmt = $dbh->prepare("SELECT * FROM videos WHERE course_id IN ($placeholders)");
+                                      $stmt->execute($enrolled_course_ids);
+                                      $videos = $stmt->fetchAll(PDO::FETCH_OBJ);
+                                  } else {
+                                      $videos = [];
+                                  }
+                                ?>
+
+                                <div class="col-md-6 report-inner-cards-wrapper">
+                                    <div class="report-inner-card" style="background-color: aquamarine;">
+                                        <div class="inner-card-text text-white">
+                                            <span class="report-title">Videos</span>
+                                            <h4><?php echo count($videos); ?></h4>
+                                        </div>
+                                        <div class="inner-card-icon"><i class="icon-camrecorder"></i></div>
+                                    </div>
+                                </div>
+
+                                <?php
+                                  if ($placeholders) {
+                                      $stmt = $dbh->prepare("SELECT * FROM materials WHERE course_id IN ($placeholders)");
+                                      $stmt->execute($enrolled_course_ids);
+                                      $materials = $stmt->fetchAll(PDO::FETCH_OBJ);
+                                  } else {
+                                      $materials = [];
+                                  }
+                                ?>
+
+                                <div class="col-md-6 report-inner-cards-wrapper">
+                                    <div class="report-inner-card color-2">
+                                        <div class="inner-card-text text-white">
+                                            <span class="report-title">Total Materials</span>
+                                            <h4><?php echo count($materials); ?></h4>
+                                        </div>
+                                        <div class="inner-card-icon"><i class="icon-doc"></i></div>
+                                    </div>
+                                </div>
+
+
+                                <?php
+                                  if ($placeholders) {
+                                      // Get all assignments from enrolled courses
+                                      $stmt = $dbh->prepare("SELECT id FROM assignments WHERE course_id IN ($placeholders)");
+                                      $stmt->execute($enrolled_course_ids);
+                                      $allAssignments = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+                                      // Get student actual ID
+                                      $stmt = $dbh->prepare("SELECT id FROM students WHERE user_id = ?");
+                                      $stmt->execute([$_SESSION['sturecmsaid']]);
+                                      $student = $stmt->fetch();
+                                      $actual_student_id = $student['id'] ?? 0;
+
+                                      // Get assignments already submitted by this student
+                                      $stmt = $dbh->prepare("SELECT assignment_id FROM assignment_submissions WHERE student_id = ?");
+                                      $stmt->execute([$actual_student_id]);
+                                      $submittedAssignments = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+                                      // Calculate unsubmitted assignments
+                                      $unsubmittedAssignments = array_diff($allAssignments, $submittedAssignments);
+                                  } else {
+                                      $unsubmittedAssignments = [];
+                                  }
+                                ?>
+
+                                <div class="col-md-6 report-inner-cards-wrapper">
+                                    <div class="report-inner-card color-3">
+                                        <div class="inner-card-text text-white">
+                                            <span class="report-title">Unsubmitted Assignments</span>
+                                            <h4><?php echo count($unsubmittedAssignments); ?></h4>
+                                            <a href="view-assignments"><span class="report-count"> View Assignment</span></a>
+                                        </div>
+                                        <div class="inner-card-icon"><i class="icon-note"></i></div>
+                                    </div>
+                                </div>
+
                             <?php endif; ?>
                           </div>
 
@@ -284,6 +452,7 @@ $totnotice = $dbh->query("SELECT COUNT(*) FROM notice")->fetchColumn();
 
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
+<!-- admin -->
 <?php if (isset($_SESSION['role']) && $_SESSION['role'] === "admin") : ?>
 
     <?php
@@ -359,7 +528,7 @@ $totnotice = $dbh->query("SELECT COUNT(*) FROM notice")->fetchColumn();
 
 <?php endif; ?>
 
-                                
+<!-- Lecturer -->
 <?php if (isset($_SESSION['role']) && $_SESSION['role'] === "instructor") : ?>
   <script type="text/javascript">
       google.charts.load('current', {'packages':['corechart']});
@@ -370,12 +539,14 @@ $totnotice = $dbh->query("SELECT COUNT(*) FROM notice")->fetchColumn();
               ['Entity', 'Count'],
               ['Courses', <?php echo count($courses); ?>],
               ['Videos', <?php echo $videos->total; ?>],
-              ['Materials', <?php echo $materials->total; ?>]
+              ['Materials', <?php echo $materials->total; ?>],
+              ['Assignments', <?php echo $assignments->total; ?>]
+              ['Ungrade assignments', <?php echo $ungraded->ungraded; ?>]
           ]);
 
           var options = {
               title: 'Instructor Overview',
-              colors: ['#4043dd', '#7fffd4', '#f48324']
+              colors: ['#4043dd', '#7fffd4', '#f48324', '#90db72', 'f2240d']
           };
 
           var chart = new google.visualization.PieChart(document.getElementById('piechart'));
